@@ -1,0 +1,90 @@
+{template "header.html"}
+<div class="note note-danger">
+    <p><a href="javascript:dr_update_cache();">{dr_lang('更改数据之后需要更新缓存之后才能生效')}</a></p>
+</div>
+<form action="" class="form-horizontal" method="post" name="myform" id="myform">
+    {$form}
+    <div class="portlet bordered light myfbody">
+        <div class="portlet-title tabbable-line">
+            <ul class="nav nav-tabs" style="float:left;">
+                <li class="{if $page==0}active{/if}">
+                    <a href="#tab_0" data-toggle="tab" onclick="$('#dr_page').val('0')">  <i class="fa fa-paw"></i> 百度主动推送 </a>
+                </li>
+
+            </ul>
+        </div>
+        <div class="portlet-body">
+            <div class="tab-content">
+
+                <div class="tab-pane {if $page==0}active{/if}" id="tab_0">
+                    <div class="form-body">
+
+
+                        {cache name=module $t}
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">{$t.name}</label>
+                            <div class="col-md-9">
+                                <input type="checkbox" name="data[use][]" value="{$t.dirname}" {if in_array($t.dirname, $data['use'])}checked{/if} data-on-text="{dr_lang('开启')}" data-off-text="{dr_lang('关闭')}" data-on-color="success" data-off-color="danger" class="make-switch" data-size="small">
+                            </div>
+                        </div>
+                        {/cache}
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label"></label>
+                            <div class="col-md-5">
+                                <a href="javascript:add_menu();" class="btn green"><i class="fa fa-plus"></i> {dr_lang('添加域名')}</a>
+                            </div>
+                        </div>
+                        <div id="menu_body">
+                            {loop $data.bdts $t}
+                            <div class="form-group">
+                                <label class="col-md-2 control-label">&nbsp;</label>
+                                <div class="col-md-7 ">
+                                    <label><input class="form-control " type="text" name="data[bdts][][site]" placeholder="{dr_lang('站点域名')}" value="{$t.site}"></label>
+
+                                    <label><input class="form-control input-large" type="text" name="data[bdts][][token]" value="{$t.token}" placeholder="{dr_lang('密钥token')}"></label>
+                                    <label><a href="javascript:;" onClick="remove_menu(this)" class="btn red"><i class="fa fa-trash"></i> {dr_lang('删除')}</a></label>
+                                </div>
+                            </div>
+                            {/loop}
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">{dr_lang('接口说明')}</label>
+                            <div class="col-md-7">
+                                <span class="help-block">链接提交工具是网站主动向百度搜索推送数据的工具，本工具可缩短爬虫发现网站链接时间，网站时效性内容建议使用链接提交工具，实时向搜索推送数据。本工具可加快爬虫抓取速度，无法解决网站内容是否收录问题。</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+
+    <div class="portlet-body form myfooter">
+        <div class="form-actions text-center">
+            <button type="button" onclick="dr_ajax_submit('{dr_now_url()}&page='+$('#dr_page').val(), 'myform', '2000')" class="btn green"> <i class="fa fa-save"></i> {dr_lang('保存')}</button>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+    function add_menu() {
+        var data = '<div class="form-group"><label class="col-md-2 control-label">&nbsp;</label><div class="col-md-8"><label><input class="form-control " type="text" name="data[bdts][][site]" placeholder="{dr_lang('站点域名')}" value=""></label>&nbsp;<label><input class="form-control input-large" type="text" name="data[bdts][][token]" placeholder="{dr_lang('密钥token')}"></label><label>&nbsp;<a href="javascript:;" onClick="remove_menu(this)" class="btn red"><i class="fa fa-trash"></i> {dr_lang('删除')}</a></label></div></div>';
+        $('#menu_body').append(data);
+    }
+    function add_menu2() {
+        var data = '<div class="form-group"><label class="col-md-2 control-label">&nbsp;</label><div class="col-md-8"><label><input class="form-control " type="text" name="data[bdxz][][site]" placeholder="{dr_lang('站点域名')}" value=""></label>&nbsp;<label><input class="form-control " type="text" name="data[bdxz][][appid]" placeholder="{dr_lang('熊掌Appid')}" value=""></label>&nbsp;<label><input class="form-control input-large" type="text" name="data[bdxz][][token]" placeholder="{dr_lang('密钥token')}"></label><label>&nbsp;<a href="javascript:;" onClick="remove_menu(this)" class="btn red"><i class="fa fa-trash"></i> {dr_lang('删除')}</a></label></div></div>';
+        $('#menu_body2').append(data);
+    }
+    function remove_menu(_this) {
+        $(_this).parent().parent().parent().remove()
+    }
+
+</script>
+
+{template "footer.html"}

@@ -23,6 +23,7 @@ class Bdapi extends \Phpcmf\App
     protected $tag_table;//tag表
     protected $quota;
     protected $mip;
+    protected $times;
 
     public function __construct(... $params)
     {
@@ -30,7 +31,7 @@ class Bdapi extends \Phpcmf\App
         $this->input = new Input();
         $this->module_name = $this->input->request('module');
         !$this->module_name && exit('模块名不能为空');
-        if ($this->input->request('auth') != 'a5f#d3#d5g@d5g*1a2&') {
+        if ($this->input->request('auth') != 'a5f23d&323d5!gd5g1a226') {
             exit('全局变量错误');
         }
         //每日配额量
@@ -41,6 +42,7 @@ class Bdapi extends \Phpcmf\App
         $this->main_table = \Phpcmf\Service::M()->dbprefix(SITE_ID . '_' . $this->module_name);
         $this->tag_table = \Phpcmf\Service::M()->dbprefix(SITE_ID . '_tag');
         $this->mip = $this->input->request('mip');//是否mip域名
+        $this->times = 150;//每日推送次数
         //检查表字段是否存在
         if (!\Phpcmf\Service::M()->db->fieldExists('push_num', $this->main_table)) {
             \Phpcmf\Service::M()->query('ALTER TABLE `' . $this->main_table . '` ADD `push_num` INT(10) DEFAULT 0 COMMENT \'百度api推送次数\'');
@@ -49,6 +51,7 @@ class Bdapi extends \Phpcmf\App
             \Phpcmf\Service::M()->query('ALTER TABLE `' . $this->tag_table . '` ADD `push_num` INT(10) DEFAULT 0 COMMENT \'百度api推送次数\'');
         }
     }
+
 
     /**
      * 外部推送接口
@@ -59,45 +62,30 @@ class Bdapi extends \Phpcmf\App
     public function push()
     {
         //本次推送记录数量
-        $num = floor(intval($this->quota) / 24);
-        $items = $this->get_all_url($num);
-        foreach ($items as $item) {
-            list($url, $old) = explode('----', $item, 2);
-            sleep(random_int(0, 3));//推送延时
-            $this->push_url($url, $old, $this->mip);
-        }
-        exit('推送成功,本次推送：' . $num . '条记录。');
-    }
-
-
-    /**
-     * 获取所有待推送的url
-     * @param int $num
-     * @return array
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\DbException
-     * @throws \think\db\exception\ModelNotFoundException
-     */
-    protected function get_all_url(int $num)
-    {
+        $num = floor(intval($this->quota) / $this->times);
         //需要先聚合查询 取出最小的push_num值
         $main_push_num = Db::table($this->main_table)->min('push_num', true);
         $tag_push_num = Db::table($this->tag_table)->min('push_num', true);
         //取得结果集
         $rows = $this->get_rows($num, $main_push_num, $tag_push_num);
-        $urls = [];
         foreach ($rows as $row) {
+            sleep(random_int(0, 2));//推送延时
             //tag表
             if (array_key_exists('code', $row) && array_key_exists('pcode', $row)) {
-                $urls[] = '/title/' . $row['code'] . '.html' . '----' . $row['push_num'];
-                //自增字段值
-                Db::table($this->tag_table)->where('id', $row['id'])->inc('push_num')->update();
+                $url = '/title/' . $row['code'] . '.html';
+                $times = $row['push_num'];
+                if ($this->push_url($url, $times, $this->mip)) {
+                    //自增字段值
+                    Db::table($this->tag_table)->where('id', $row['id'])->inc('push_num')->update();
+                }
             } else {
-                $urls[] = $row['url'] . '----' . $row['push_num'];
-                Db::table($this->main_table)->where('id', $row['id'])->inc('push_num')->update();
+                $url = $row['url'];
+                $times = $row['push_num'];
+                if ($this->push_url($url, $times, $this->mip)) {
+                    Db::table($this->main_table)->where('id', $row['id'])->inc('push_num')->update();
+                }
             }
         }
-        return array_unique($urls);
     }
 
     /**
@@ -158,10 +146,11 @@ class Bdapi extends \Phpcmf\App
      * @param $url  相对路径url
      * @param bool $old 是否已推送过
      * @param bool $mip 是否mip域名
+     * @return bool
      */
     protected function push_url($url, $old = false, $mip = false)
     {
-        \Phpcmf\Service::M('bdts', 'bdts')->module_bdts(
+        return \Phpcmf\Service::M('bdts', 'bdts')->module_bdts(
             $this->module_name,
             $url,
             $old ? 'edit' : 'add',

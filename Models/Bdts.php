@@ -43,6 +43,7 @@ class Bdts extends \Phpcmf\Model
      * @param string $url 相对路径
      * @param string $action 是否首次推送
      * @param bool $mip 是否mip域名
+     * @return bool
      */
     public function module_bdts($mid, $url, $action = 'add', $mip = false)
     {
@@ -50,10 +51,10 @@ class Bdts extends \Phpcmf\Model
         $config = $this->getConfig();
         if (!$config) {
             log_message('error', '百度推送配置为空，不能推送');
-            return;
+            return false;
         } elseif (!in_array($mid, $config['use'])) {
             log_message('error', '模块【' . $mid . '】百度推送配置没有开启，不能推送');
-            return;
+            return false;
         }
 
         // pc域名
@@ -62,7 +63,7 @@ class Bdts extends \Phpcmf\Model
         $site = $uri['host'];
         if (!$site) {
             log_message('error', '百度推送没有获取到内容url（' . $purl . '）的host值，不能推送');
-            return;
+            return false;
         }
 
         // 获取移动端域名
@@ -110,9 +111,11 @@ class Bdts extends \Phpcmf\Model
                     if ($rt['error']) {
                         // 错误日志
                         @file_put_contents(WRITEPATH . 'bdts_log.php', date('Y-m-d H:i:s') . ' PC端[' . $purl . '] - 失败 - ' . $rt['message'] . PHP_EOL, FILE_APPEND);
+                        return false;
                     } else {
                         // 推送成功
                         @file_put_contents(WRITEPATH . 'bdts_log.php', date('Y-m-d H:i:s') . ' PC端[' . $purl . '] - 成功' . PHP_EOL, FILE_APPEND);
+                        return true;
                     }
                 }
 
@@ -139,9 +142,11 @@ class Bdts extends \Phpcmf\Model
                     if ($rt['error']) {
                         // 错误日志
                         @file_put_contents(WRITEPATH . 'bdts_log.php', date('Y-m-d H:i:s') . ' 移动端[' . $murl . '] - 失败 - ' . $rt['message'] . PHP_EOL, FILE_APPEND);
+                        return false;
                     } else {
                         // 推送成功
                         @file_put_contents(WRITEPATH . 'bdts_log.php', date('Y-m-d H:i:s') . ' 移动端[' . $murl . '] - 成功' . PHP_EOL, FILE_APPEND);
+                        return true;
                     }
                 }
             }

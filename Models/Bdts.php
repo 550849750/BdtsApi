@@ -115,7 +115,6 @@ class Bdts extends \Phpcmf\Model
                     } else {
                         // 推送成功
                         @file_put_contents(WRITEPATH . 'bdts_log.php', date('Y-m-d H:i:s') . ' PC端[' . $purl . '] - 成功' . PHP_EOL, FILE_APPEND);
-                        return true;
                     }
                 }
 
@@ -146,13 +145,12 @@ class Bdts extends \Phpcmf\Model
                     } else {
                         // 推送成功
                         @file_put_contents(WRITEPATH . 'bdts_log.php', date('Y-m-d H:i:s') . ' 移动端[' . $murl . '] - 成功' . PHP_EOL, FILE_APPEND);
-                        return true;
                     }
                 }
             }
 
         }
-
+        return true;
     }
 
 

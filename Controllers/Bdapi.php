@@ -86,6 +86,7 @@ class Bdapi extends \Phpcmf\App
                 }
             }
         }
+        exit('推送完成，本次推送：' . $num . '条。');
     }
 
     /**

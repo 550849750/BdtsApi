@@ -1,5 +1,5 @@
 # BdtsApi
-*XR插件 百度推送自动化接口
+*	XR插件 百度推送自动化接口
 # 接口访问地址:
 *	/index.php?s=bdts?c=bdapi&m=push
 ### 必须携带POST参数:

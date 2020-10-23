@@ -125,8 +125,8 @@ class Bdts extends \Phpcmf\Model
                     @file_put_contents(WRITEPATH . 'bdts_log.php', date('Y-m-d H:i:s') . ' 移动端[' . $murl . '] - 域名规范或者域名不是移动端域名（' . SITE_MURL . '） - 未推送 ' . PHP_EOL, FILE_APPEND);
                 } else {
                     $api = $this->zzurl[$action] . '?site=' . $m_site . '&token=' . $m_token;
-                    //mip域名推送地址
-                    $mip && $api .= '&type=mip';
+                    //mip域名推送地址(没有mip)
+                    /*$mip && $api .= '&type=mip';*/
                     $urls = [$murl];
                     $ch = curl_init();
                     $options = array(
